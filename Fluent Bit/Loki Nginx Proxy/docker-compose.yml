@@ -1,0 +1,64 @@
+version: "3.9"
+
+services:
+  fluent-bit:
+    depends_on:
+      - loki
+
+    image: fluent/fluent-bit:latest
+    container_name: fluent-bit
+    restart: unless-stopped
+
+    volumes:
+      - ./fluent-bit-confs/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro
+      - ./fluent-bit-confs/inputs.conf:/fluent-bit/etc/inputs.conf:ro
+      - ./fluent-bit-confs/filters.conf:/fluent-bit/etc/filters.conf:ro
+      - ./fluent-bit-confs/outputs.conf:/fluent-bit/etc/outputs.conf:ro
+      - ./fluent-bit-confs/parsers.conf:/fluent-bit/etc/parsers.conf:ro
+
+      - ./logs:/logs:ro
+      - ./fluent-bit-state:/fluent-bit/state
+
+    environment:
+      AZURE_STORAGE_ACCOUNT: ${AZURE_STORAGE_ACCOUNT}
+      AZURE_STORAGE_KEY: ${AZURE_STORAGE_KEY}
+      AZURE_CONTAINER_NAME: ${AZURE_CONTAINER_NAME}
+
+    command:
+      - /fluent-bit/bin/fluent-bit
+      - -c
+      - /fluent-bit/etc/fluent-bit.conf
+
+  loki:
+    image: grafana/loki:2.9.0
+    container_name: loki
+    restart: unless-stopped
+
+    command:
+      - -config.file=/etc/loki/config.yml
+
+    volumes:
+      - ./loki-conf/loki-config.yml:/etc/loki/config.yml:ro
+      - loki-data:/loki
+
+    # ⛔ remove this in real prod
+    # keep for debugging if you want
+    ports:
+      - "3100:3100"
+
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: nginx
+    restart: unless-stopped
+
+    ports:
+      - "80:80"
+
+    volumes:
+      - ./nginx-conf/nginx.conf:/etc/nginx/nginx.conf:ro
+
+    depends_on:
+      - loki
+
+volumes:
+  loki-data:
