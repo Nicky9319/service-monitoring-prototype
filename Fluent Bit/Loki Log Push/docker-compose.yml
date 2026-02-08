@@ -20,6 +20,9 @@ services:
       # Docker container logs (READ-ONLY)
       - ./logs:/logs:ro
 
+      # Fluent Bit state persistence (for tail offset tracking)
+      - ./fluent-bit-state:/fluent-bit/state
+
     environment:
       AZURE_STORAGE_ACCOUNT: ${AZURE_STORAGE_ACCOUNT}
       AZURE_STORAGE_KEY: ${AZURE_STORAGE_KEY}
