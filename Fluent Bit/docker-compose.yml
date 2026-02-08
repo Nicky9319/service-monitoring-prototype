@@ -1,0 +1,31 @@
+  version: "3.9"
+
+  services:
+    fluent-bit:
+      image: fluent/fluent-bit:latest
+      container_name: fluent-bit
+      restart: unless-stopped
+
+      volumes:
+        # Fluent Bit configuration
+        - ./fluent-bit-confs/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro
+        - ./fluent-bit-confs/inputs.conf:/fluent-bit/etc/inputs.conf:ro
+        - ./fluent-bit-confs/filters.conf:/fluent-bit/etc/filters.conf:ro
+        - ./fluent-bit-confs/outputs.conf:/fluent-bit/etc/outputs.conf:ro
+        - ./fluent-bit-confs/parsers.conf:/fluent-bit/etc/parsers.conf:ro
+
+        # Docker container logs (READ-ONLY)
+        - ./logs:/logs:ro
+
+      env_file:
+        - .env
+
+      environment:
+        AZURE_STORAGE_ACCOUNT: ${AZURE_STORAGE_ACCOUNT}
+        AZURE_STORAGE_KEY: ${AZURE_STORAGE_KEY}
+        AZURE_CONTAINER_NAME: ${AZURE_CONTAINER_NAME}
+
+      command:
+        - /fluent-bit/bin/fluent-bit
+        - -c
+        - /fluent-bit/etc/fluent-bit.conf
