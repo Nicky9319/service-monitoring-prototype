@@ -25,7 +25,7 @@ services:
       AZURE_STORAGE_CONNECTION_STRING: "${AZURE_STORAGE_CONNECTION_STRING:-}"
       AZURE_CONTAINER: "${AZURE_CONTAINER:-logs}"
     volumes:
-      - ./fluentd/fluent.conf:/fluentd/etc/fluent.conf:ro
+      - ./fluentd/fluent.yaml:/fluentd/etc/fluent.yaml:ro
       - fluentd-buffer:/var/log/fluent/buffer
     networks:
       - logging-net
