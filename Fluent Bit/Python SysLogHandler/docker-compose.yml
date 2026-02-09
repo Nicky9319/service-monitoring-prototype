@@ -1,0 +1,13 @@
+version: "3.8"
+
+services:
+  fluent-bit:
+    image: fluent/fluent-bit:4.2
+    container_name: fluent-bit
+    ports:
+      - "5140:5140/udp"
+    volumes:
+      - ./fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
+    command: >
+      /fluent-bit/bin/fluent-bit
+      -c /fluent-bit/etc/fluent-bit.conf
