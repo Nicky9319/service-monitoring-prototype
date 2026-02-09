@@ -1,0 +1,40 @@
+version: "3.8"
+services:
+  fluent-bit:
+    image: fluent/fluent-bit:latest
+    container_name: fluent-bit
+    volumes:
+      - ./logs:/var/log/myapp:ro
+      - ./fluent-bit/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro
+      - ./fluent-bit/parsers.conf:/fluent-bit/etc/parsers.conf:ro
+      - ./fluent-bit/state:/var/log/fluent-bit
+    networks:
+      - logging-net
+    restart: unless-stopped
+
+  fluentd:
+    build:
+      context: ./fluentd
+    container_name: fluentd
+    ports:
+      - "24224:24224"
+      - "24224:24224/udp"
+    environment:
+      AZURE_STORAGE_ACCOUNT: "${AZURE_STORAGE_ACCOUNT:-}"
+      AZURE_STORAGE_ACCESS_KEY: "${AZURE_STORAGE_ACCESS_KEY:-}"
+      AZURE_STORAGE_CONNECTION_STRING: "${AZURE_STORAGE_CONNECTION_STRING:-}"
+      AZURE_CONTAINER: "${AZURE_CONTAINER:-logs}"
+    volumes:
+      - ./fluentd/fluent.conf:/fluentd/etc/fluent.conf:ro
+      - fluentd-buffer:/var/log/fluent/buffer
+    networks:
+      - logging-net
+    restart: unless-stopped
+
+volumes:
+  fluentd-buffer:
+    driver: local
+
+networks:
+  logging-net:
+    driver: bridge
