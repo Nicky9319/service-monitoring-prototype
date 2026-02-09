@@ -1,0 +1,26 @@
+version: "3.8"
+
+services:
+  loki:
+    image: grafana/loki:2.9.0
+    restart: unless-stopped
+
+    container_name: loki
+
+    ports:
+      - "3100:3100"
+
+    volumes:
+      - ./loki-conf/loki-config.yaml:/etc/loki/loki.yaml
+      - loki-data:/loki
+      
+
+    environment:
+      AZURE_STORAGE_ACCOUNT: ${AZURE_STORAGE_ACCOUNT}
+      AZURE_STORAGE_KEY: ${AZURE_STORAGE_KEY}
+      AZURE_CONTAINER_NAME: ${AZURE_CONTAINER_NAME}
+
+    command: -config.file=/etc/loki/loki.yaml -config.expand-env=true
+
+volumes:
+  loki-data:
