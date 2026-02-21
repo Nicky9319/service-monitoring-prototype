@@ -1,0 +1,30 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'alloy-prometheus-stack'
+
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Alloy self-monitoring (optional - monitor Alloy itself)
+  - job_name: 'alloy'
+    static_configs:
+      - targets: ['alloy:12345']
+    scrape_interval: 30s
+
+  # FastAPI metrics are now scraped by Alloy and pushed via remote write
+  # No need for direct scraping here
+
+# Note: Metrics from FastAPI service are now received via Alloy remote write
+# The remote write receiver is enabled via the Docker command flag:
+# --web.enable-remote-write-receiver
+# Alloy will push metrics here via the remote write protocol at:
+# http://prometheus:9090/api/v1/write

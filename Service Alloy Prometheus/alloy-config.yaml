@@ -1,0 +1,18 @@
+logging {
+  level = "info"
+}
+
+// Scrape metrics from the FastAPI service
+prometheus.scrape "fastapi" {
+  targets = [{"__address__" = "host.docker.internal:8000"}]
+  forward_to = [prometheus.remote_write.prom.receiver]
+  scrape_interval = "15s"
+  metrics_path = "/metrics"
+}
+
+// Remote write configuration to send metrics to Prometheus
+prometheus.remote_write "prom" {
+  endpoint {
+    url = "http://prometheus:9090/api/v1/write"
+  }
+}
